@@ -1,0 +1,15 @@
+{
+  "tileset": {
+    "width": 16,
+    "height": 16,
+    "spacing": 1,
+    "margin": 1,
+    "nearest": false
+  },
+  "tiles": {
+    "grass": [0, 0],
+    "sand": [0, 1],
+    "water": [1, 0],
+    "rock": [1, 1]
+  }
+}
