@@ -4,6 +4,8 @@ from myrpg.editor.dialog import AddItemDialog
 
 from gi.repository import Gtk
 
+import shutil
+import json
 import os
 
 
@@ -84,24 +86,48 @@ class ProjectTree(Gtk.TreeView):
 
         return menu
 
+    def empty_nodes(self):
+        model = self.get_model()
+
+        for parent in [self.menus, self.objects, self.tilesets, self.maps]:
+            if model.iter_has_child(parent):
+                iterator = model.iter_children(parent)
+
+                while iterator is not None:
+                    model.remove(iterator)
+                    iterator = model.iter_children(parent)
+
     def load_project(self, project):
+        self.empty_nodes()
+
         self.project = project
 
-        menuspath = os.path.join(project['directory'], 'menus')
-        objectspath = os.path.join(project['directory'], 'objects')
-        tilesetspath = os.path.join(project['directory'], 'tilesets')
-        mapspath = os.path.join(project['directory'], 'maps')
+        directories = {
+            'menu': os.path.join(project['directory'], 'menus'),
+            'object': os.path.join(project['directory'], 'objects'),
+            'tileset': os.path.join(project['directory'], 'tilesets'),
+            'map': os.path.join(project['directory'], 'maps')
+        }
+
+        for itemtype in directories:
+            path = directories[itemtype]
+
+            for name in os.listdir(path):
+                self.load_item(itemtype, name)
+
+    def load_item(self, itemtype, name):
+        itemmap = {
+            'menu': (self.menus, Gtk.STOCK_INDEX),
+            'object': (self.objects, Gtk.STOCK_EXECUTE),
+            'tileset': (self.tilesets, Gtk.STOCK_SELECT_COLOR),
+            'map': (self.maps, Gtk.STOCK_PAGE_SETUP)
+        }
 
         model = self.get_model()
 
-        for parent, path, icon, itemtype in [
-            (self.menus, menuspath, Gtk.STOCK_INDEX, 'menu'),
-            (self.objects, objectspath, Gtk.STOCK_EXECUTE, 'object'),
-            (self.tilesets, tilesetspath, Gtk.STOCK_SELECT_COLOR, 'tileset'),
-            (self.maps, mapspath, Gtk.STOCK_PAGE_SETUP, 'map')
-        ]:
-            for name in os.listdir(path):
-                model.append(parent, [icon, name, itemtype])
+        itemmodel = itemmap[itemtype]
+        model.append(itemmodel[0], [itemmodel[1], name, itemtype])
+        self.expand_all()
 
     def on_button_press(self, widget, event):
         if event.button == 3:
@@ -126,35 +152,129 @@ class ProjectTree(Gtk.TreeView):
                 menu.popup(None, None, None, None, event.button, event.time)
 
     def add_item(self, widget, item):
+        if self.project is not None:
+            itemname, _ = item
+
+            newitemtype = itemname[:-1]
+            newitem = AddItemDialog.get_item_name(
+                newitemtype,
+                parent=self.parentwin
+            )
+
+            handler = getattr(self, 'add_{0}'.format(newitemtype))
+            handler(newitem)
+
+            self.load_item(newitemtype, newitem)
+
+        else:
+            dialog = Gtk.MessageDialog(
+                self.parentwin, 0,
+                Gtk.MessageType.ERROR,
+                (
+                    Gtk.STOCK_OK, Gtk.ResponseType.OK
+                ),
+                'Impossible to create new item, no project loaded'
+            )
+
+            dialog.run()
+            dialog.destroy()
+
+    def delete_item(self, parent, item):
         itemname, itemtype = item
 
-        newitem = AddItemDialog.get_item_name(
-            itemname[:-1],
-            parent=self.parentwin
+        model = self.get_model()
+
+        for i in range(model.iter_n_children(parent)):
+            child = model.iter_nth_child(parent, i)
+
+            name = model.get_value(child, 1)
+
+            if name == itemname:
+                break
+
+        else:
+            child = None
+
+        if child is not None:
+            model.remove(child)
+
+        itemtype = '{0}s'.format(itemtype)
+        shutil.rmtree(
+            os.path.join(self.project['directory'], itemtype, itemname)
         )
 
-        print(itemname, itemtype, newitem)
+    def add_menu(self, item):
+        itempath = os.path.join(self.project['directory'], 'menus', item)
+
+        if not os.path.exists(itempath):
+            os.makedirs(itempath)
+
+            with open(os.path.join(itempath, 'definition.json'), 'w') as f:
+                json.dump({'title': item, 'actions': []}, f)
+
+            with open(os.path.join(itempath, 'script.lua'), 'w') as f:
+                pass
 
     def edit_menu(self, widget, item):
         pass
 
     def delete_menu(self, widget, item):
-        pass
+        self.delete_item(self.menus, item)
+
+    def add_object(self, item):
+        itempath = os.path.join(self.project['directory'], 'objects', item)
+
+        if not os.path.exists(itempath):
+            os.makedirs(itempath)
+
+            with open(os.path.join(itempath, 'definition.json'), 'w') as f:
+                json.dump({}, f)
+
+            with open(os.path.join(itempath, 'script.lua'), 'w') as f:
+                pass
 
     def edit_object(self, widget, item):
         pass
 
     def delete_object(self, widget, item):
-        pass
+        self.delete_item(self.objects, item)
+
+    def add_tileset(self, item):
+        itempath = os.path.join(self.project['directory'], 'tilesets', item)
+
+        if not os.path.exists(itempath):
+            os.makedirs(itempath)
+
+            with open(os.path.join(itempath, 'definition.json'), 'w') as f:
+                json.dump({}, f)
+
+            with open(os.path.join(itempath, 'tileset.png'), 'w') as f:
+                pass
 
     def edit_tileset(self, widget, item):
         pass
 
     def delete_tileset(self, widget, item):
-        pass
+        self.delete_item(self.tilesets, item)
+
+    def add_map(self, item):
+        itempath = os.path.join(self.project['directory'], 'maps', item)
+
+        if not os.path.exists(itempath):
+            os.makedirs(itempath)
+
+            with open(os.path.join(itempath, 'definition.json'), 'w') as f:
+                json.dump({
+                    'width': 0,
+                    'height': 0,
+                    'tilewidth': 16,
+                    'tileheight': 16,
+                    'layers': [],
+                    'objectgroups': []
+                }, f)
 
     def edit_map(self, widget, item):
         pass
 
     def delete_map(self, widget, item):
-        pass
+        self.delete_item(self.maps, item)

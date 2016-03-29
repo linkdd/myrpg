@@ -13,7 +13,7 @@ class View(Gtk.HPaned):
         self.tree = ProjectTree(parent=parent)
         self.workspace = ProjectWorkspace()
 
-        self.pack1(self.tree, True, False)
+        self.pack1(self.tree, True, True)
         self.pack2(self.workspace, True, False)
 
     def load_project(self, sender, package, directory):

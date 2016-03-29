@@ -19,8 +19,7 @@ ENTRY_POINTS = [
 REQUIREMENTS = [
     'b3j0f.conf',
     'six',
-    'pyglet',
-    'PySide'
+    'pyglet'
 ]
 
 
