@@ -2,5 +2,6 @@
     "states": {
         "open": "chest-open.png",
         "closed": "chest-closed.png"
-    }
+    },
+    "state": "closed"
 }

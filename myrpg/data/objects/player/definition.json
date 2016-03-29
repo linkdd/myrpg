@@ -1,0 +1,7 @@
+{
+    "states": {
+        "normal": "player-normal.png",
+        "attacking": "player-attacking.png",
+        "walking": "player-walking.png"
+    }
+}

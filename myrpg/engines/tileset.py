@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from myrpg.engines.resources.tileset import TilesetResource
+from myrpg.resources.tileset import TilesetResource
 from pyglet import gl
 import pyglet
 

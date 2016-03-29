@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from myrpg.engines.resources.base import Resource
+from myrpg.resources.base import Resource
 import pyglet
 import json
 import os

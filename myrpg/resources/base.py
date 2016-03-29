@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from myrpg import PACKAGE
+from b3j0f.conf import Configurable, Category, Parameter
+from myrpg import MYRPG_CONF_PATH
 
 from xdg.BaseDirectory import xdg_data_home, xdg_data_dirs
 import pkg_resources
 import os
 
 
+@Configurable(
+    paths=MYRPG_CONF_PATH,
+    conf=Category(
+        'RESOURCES',
+        Parameter('package')
+    )
+)
 class Resource(object):
 
     resource_type = 'rsrc'
@@ -20,7 +28,7 @@ class Resource(object):
         dirs = [xdg_data_home] + xdg_data_dirs
 
         for datadir in dirs:
-            rsrc = os.path.join(datadir, PACKAGE, rtype, name)
+            rsrc = os.path.join(datadir, self.package, rtype, name)
 
             if os.path.exists(rsrc):
                 return open(rsrc)

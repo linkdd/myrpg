@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from myrpg.engines.tile.tileset import Tileset
+from myrpg.engines.tileset import Tileset
 
 
 class Layer(object):

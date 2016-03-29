@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from myrpg.engines.resources.map import MapResource
-from myrpg.engines.tile.objects import ObjectGroup
-from myrpg.engines.tile.layer import Layer
+from myrpg.resources.map import MapResource
+from myrpg.engines.objects import ObjectGroup
+from myrpg.engines.layer import Layer
 
 
 class Map(object):

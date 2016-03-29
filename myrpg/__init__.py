@@ -1,4 +1,3 @@
 # -*- coding: utf-8 -*-
 
-VERSION = '0.1'
-PACKAGE = 'myrpg'
+__version__ = '0.1'
